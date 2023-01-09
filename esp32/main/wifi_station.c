@@ -81,8 +81,8 @@ wifi_station_res_t wifi_station_init(char *ssid, char *pswd)
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 
     wifi_config_t wifi_config = {};
-    strncpy((char *)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
-    strncpy((char *)wifi_config.sta.password, pswd, sizeof(wifi_config.sta.password));
+    strncpy((char *)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid)-1);
+    strncpy((char *)wifi_config.sta.password, pswd, sizeof(wifi_config.sta.password)-1);
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));

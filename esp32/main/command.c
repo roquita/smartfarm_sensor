@@ -8,13 +8,9 @@
 #include "nonvolatile.h"
 #include "wifi_station.h"
 #include "project_defines.h"
+#include "http_post.h"
 
 static const char *TAG_COMMANDS = "COMMANDS";
-
-static bool parse_command_two_args()
-{
-    return true;
-}
 
 void command_handler(char *command)
 {
@@ -26,13 +22,13 @@ void command_handler(char *command)
     int num_args = 0;
 
     //  get at
-    at = strtok(command, "=,");
+    at = strtok(command, SPLIT_PATTERN);
 
     // get args
     int index_args = 0;
     while (index_args < COMMAND_NUM_ARGS_MAX)
     {
-        char *p = strtok(NULL, "=,");
+        char *p = strtok(NULL, SPLIT_PATTERN);
         if (p == NULL)
         {
             break;
@@ -56,10 +52,12 @@ void command_handler(char *command)
     bool command_is_InitStation = (strcmp(at, AT_INITSTATION) == 0) && (num_args == 2);
     if (command_is_InitStation)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> " AT_INITSTATION);
+        ESP_LOGI(TAG_COMMANDS, AT_INITSTATION);
 
         // EXECUTE
-        wifi_station_res_t res = wifi_station_init(args[0], args[1]);
+        char *ssid = args[0];
+        char *pswd = args[1];
+        wifi_station_res_t res = wifi_station_init(ssid, pswd);
 
         // ANSWER TO MASTER
         if (res == WIFI_STATION_OK)
@@ -67,7 +65,7 @@ void command_handler(char *command)
             uart_write_bytes(UART_NUM, COMMAND_INITSTATION_OK, strlen(COMMAND_INITSTATION_OK));
         }
         else
-        {       
+        {
             uart_write_bytes(UART_NUM, COMMAND_INITSTATION_FAILED, strlen(COMMAND_INITSTATION_FAILED));
         }
         return;
@@ -86,7 +84,7 @@ void command_handler(char *command)
     bool command_is_DeinitStation = (strcmp(at, AT_DEINITSTATION) == 0) && (num_args == 0);
     if (command_is_DeinitStation)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> " AT_DEINITSTATION);
+        ESP_LOGI(TAG_COMMANDS, AT_DEINITSTATION);
 
         // EXECUTE
         wifi_station_deinit();
@@ -106,15 +104,37 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_HttpPost = (strcmp(at, "AT+HttpPost") == 0) && (num_args == 2);
+    bool command_is_HttpPost = (strcmp(at, AT_HTTPPOST) == 0) && (num_args == 4);
     if (command_is_HttpPost)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> HttpPost");
+        ESP_LOGI(TAG_COMMANDS, AT_HTTPPOST);
 
-        // COMPLETAR CODIGO RF
+        // EXECUTE
+        char *host = args[0];
+        char *path = args[1];
+        char *port = args[2];
+        char *payload = args[3];
+        http_post_res_t res = http_post(host, path, port, payload);
 
+        // ANSWER TO MASTER
+        if (res.tx_err == HTTP_POST_OK)
+        {
+            char command_httppost_ok[50];
+            int n = snprintf(command_httppost_ok, 50, "%s%s%s%s%i%s", AT_HTTPPOST, SPLIT_PATTERN, "OK", SPLIT_PATTERN, res.status_code, END_PATTERN);
+            uart_write_bytes(UART_NUM, command_httppost_ok, strlen(command_httppost_ok));
+
+            if (n >= 49)
+            {
+                ESP_LOGW(TAG_COMMANDS, "%s line %d", __FILE__, __LINE__);
+            }
+        }
+        else
+        {
+            uart_write_bytes(UART_NUM, COMMAND_HTTPPOST_FAILED, strlen(COMMAND_HTTPPOST_FAILED));
+        }
         return;
     }
+
     /*
 
      ██╗███╗   ██╗██╗████████╗     █████╗  ██████╗ ██████╗███████╗███████╗███████╗    ██████╗  ██████╗ ██╗███╗   ██╗████████╗

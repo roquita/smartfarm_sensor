@@ -162,7 +162,8 @@ void app_main(void)
 
     while (1)
     {
-        // PRINT RAM STATUS
+        // PRINT RAM 
+        
         uint32_t free_heap = xPortGetFreeHeapSize();
         uint32_t largestFreeBlock = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
         uint32_t idleSHWM = uxTaskGetStackHighWaterMark(NULL);
@@ -172,5 +173,17 @@ void app_main(void)
                  largestFreeBlock, free_heap, idleSHWM, uart1SHWM);
 
         vTaskDelay(pdMS_TO_TICKS(10000));
+        
+       /*
+        uint32_t free_heap = xPortGetFreeHeapSize();
+        uint32_t largestFreeBlock = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+        uint32_t idleSHWM = uxTaskGetStackHighWaterMark(NULL);
+        uint32_t uart1SHWM = uxTaskGetStackHighWaterMark(uart1_handle);
+
+        ESP_LOGW(TAG, "lrgsFreeBlck=%u || freeHeap=%u || idleSHWM=%u || uart1SHWM=%u ",
+                 largestFreeBlock, free_heap, idleSHWM, uart1SHWM);
+
+        vTaskDelay(pdMS_TO_TICKS(10000));
+        */
     }
 }
