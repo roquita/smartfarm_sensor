@@ -5,6 +5,15 @@
         "gpio.h": "c",
         "sdkconfig.h": "c",
         "led_strip.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "sstream": "c",
+        "regex": "c",
+        "esp_err.h": "c",
+        "nonvolatile.h": "c",
+        "uart.h": "c",
+        "project_defines.h": "c",
+        "cstring": "c",
+        "esp_wifi_private.h": "c",
+        "esp_wifi_default.h": "c"
     }
 }
