@@ -9,6 +9,7 @@
 #include "wifi_station.h"
 #include "project_defines.h"
 #include "http_post.h"
+#include "wifi_accesspoint.h"
 
 static const char *TAG_COMMANDS = "COMMANDS";
 
@@ -49,10 +50,10 @@ void command_handler(char *command)
      ██║██║ ╚████║██║   ██║       ███████║   ██║   ██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║
      ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
     */
-    bool command_is_InitStation = (strcmp(at, AT_INITSTATION) == 0) && (num_args == 2);
+    bool command_is_InitStation = (strcmp(at, AT_INIT_STATION) == 0) && (num_args == 2);
     if (command_is_InitStation)
     {
-        ESP_LOGI(TAG_COMMANDS, AT_INITSTATION);
+        ESP_LOGI(TAG_COMMANDS, AT_INIT_STATION);
 
         // EXECUTE
         char *ssid = args[0];
@@ -62,11 +63,11 @@ void command_handler(char *command)
         // ANSWER TO MASTER
         if (res == WIFI_STATION_OK)
         {
-            uart_write_bytes(UART_NUM, COMMAND_INITSTATION_OK, strlen(COMMAND_INITSTATION_OK));
+            uart_write_bytes(UART_NUM, COMMAND_INIT_STATION_OK, strlen(COMMAND_INIT_STATION_OK));
         }
         else
         {
-            uart_write_bytes(UART_NUM, COMMAND_INITSTATION_FAILED, strlen(COMMAND_INITSTATION_FAILED));
+            uart_write_bytes(UART_NUM, COMMAND_INIT_STATION_FAILED, strlen(COMMAND_INIT_STATION_FAILED));
         }
         return;
     }
@@ -81,16 +82,16 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_DeinitStation = (strcmp(at, AT_DEINITSTATION) == 0) && (num_args == 0);
+    bool command_is_DeinitStation = (strcmp(at, AT_DEINIT_STATION) == 0) && (num_args == 0);
     if (command_is_DeinitStation)
     {
-        ESP_LOGI(TAG_COMMANDS, AT_DEINITSTATION);
+        ESP_LOGI(TAG_COMMANDS, AT_DEINIT_STATION);
 
         // EXECUTE
         wifi_station_deinit();
 
         // ANSWER TO MASTER
-        uart_write_bytes(UART_NUM, COMMAND_DEINITSTATION_OK, strlen(COMMAND_DEINITSTATION_OK));
+        uart_write_bytes(UART_NUM, COMMAND_DEINIT_STATION_OK, strlen(COMMAND_DEINIT_STATION_OK));
         return;
     }
     /*
@@ -104,10 +105,10 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_HttpPost = (strcmp(at, AT_HTTPPOST) == 0) && (num_args == 4);
+    bool command_is_HttpPost = (strcmp(at, AT_HTTP_POST) == 0) && (num_args == 4);
     if (command_is_HttpPost)
     {
-        ESP_LOGI(TAG_COMMANDS, AT_HTTPPOST);
+        ESP_LOGI(TAG_COMMANDS, AT_HTTP_POST);
 
         // EXECUTE
         char *host = args[0];
@@ -120,7 +121,7 @@ void command_handler(char *command)
         if (res.tx_err == HTTP_POST_OK)
         {
             char command_httppost_ok[50];
-            int n = snprintf(command_httppost_ok, 50, "%s%s%s%s%i%s", AT_HTTPPOST, SPLIT_PATTERN, "OK", SPLIT_PATTERN, res.status_code, END_PATTERN);
+            int n = snprintf(command_httppost_ok, 50, "%s%s%s%s%i%s", AT_HTTP_POST, SPLIT_PATTERN, "OK", SPLIT_PATTERN, res.status_code, END_PATTERN);
             uart_write_bytes(UART_NUM, command_httppost_ok, strlen(command_httppost_ok));
 
             if (n >= 49)
@@ -130,7 +131,7 @@ void command_handler(char *command)
         }
         else
         {
-            uart_write_bytes(UART_NUM, COMMAND_HTTPPOST_FAILED, strlen(COMMAND_HTTPPOST_FAILED));
+            uart_write_bytes(UART_NUM, COMMAND_HTTP_POST_FAILED, strlen(COMMAND_HTTP_POST_FAILED));
         }
         return;
     }
@@ -146,12 +147,25 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_InitAccessPoint = (strcmp(at, "AT+InitAccessPoint") == 0) && (num_args == 2);
+    bool command_is_InitAccessPoint = (strcmp(at, AT_INIT_ACCESSPOINT) == 0) && (num_args == 2);
     if (command_is_InitAccessPoint)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> InitAccessPoint");
+        ESP_LOGI(TAG_COMMANDS, AT_INIT_ACCESSPOINT);
 
-        // COMPLETAR CODIGO RF
+        // EXECUTE
+        char *ssid = args[0];
+        char *pswd = args[1];
+        wifi_accesspoint_res_t res = wifi_accesspoint_init(ssid, pswd);
+
+        // ANSWER TO MASTER
+        if (res == WIFI_ACCESSPOINT_OK)
+        {
+            uart_write_bytes(UART_NUM, COMMAND_INIT_ACCESSPOINT_OK, strlen(COMMAND_INIT_ACCESSPOINT_OK));
+        }
+        else
+        {
+            uart_write_bytes(UART_NUM, COMMAND_INIT_ACCESSPOINT_FAILED, strlen(COMMAND_INIT_ACCESSPOINT_FAILED));
+        }
         return;
     }
     /*
@@ -165,11 +179,16 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_DeinitAccessPoint = (strcmp(at, "AT+DeinitAccessPoint") == 0) && (num_args == 0);
+    bool command_is_DeinitAccessPoint = (strcmp(at, AT_DEINIT_ACCESSPOINT) == 0) && (num_args == 0);
     if (command_is_DeinitAccessPoint)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> DeinitAccessPoint");
-        // COMPLETAR CODIGO RF
+        ESP_LOGI(TAG_COMMANDS, AT_DEINIT_ACCESSPOINT);
+
+        // EXECUTE
+        wifi_accesspoint_deinit();
+
+        // ANSWER TO MASTER
+        uart_write_bytes(UART_NUM, COMMAND_DEINIT_ACCESSPOINT_OK, strlen(COMMAND_DEINIT_ACCESSPOINT_OK));
 
         return;
     }
