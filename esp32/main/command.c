@@ -10,6 +10,7 @@
 #include "project_defines.h"
 #include "http_post.h"
 #include "wifi_accesspoint.h"
+#include "server.h"
 
 static const char *TAG_COMMANDS = "COMMANDS";
 
@@ -203,11 +204,23 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_InitServer = (strcmp(at, "AT+InitServer") == 0) && (num_args == 0);
+    bool command_is_InitServer = (strcmp(at, AT_INIT_SERVER) == 0) && (num_args == 0);
     if (command_is_InitServer)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> InitServer");
-        // COMPLETAR CODIGO RF
+        ESP_LOGI(TAG_COMMANDS, AT_INIT_SERVER);
+
+        // EXECUTE
+        server_res_t res = server_init();
+
+        // ANSWER TO MASTER
+        if (res == SERVER_OK)
+        {
+            uart_write_bytes(UART_NUM, COMMAND_INIT_SERVER_OK, strlen(COMMAND_INIT_SERVER_OK));
+        }
+        else
+        {
+            uart_write_bytes(UART_NUM, COMMAND_INIT_SERVER_FAILED, strlen(COMMAND_INIT_SERVER_FAILED));
+        }
         return;
     }
     /*
@@ -221,11 +234,17 @@ void command_handler(char *command)
 
 
     */
-    bool command_is_DeinitServer = (strcmp(at, "AT+DeinitServer") == 0) && (num_args == 0);
+    bool command_is_DeinitServer = (strcmp(at, AT_DEINIT_SERVER) == 0) && (num_args == 0);
     if (command_is_DeinitServer)
     {
-        ESP_LOGI(TAG_COMMANDS, "ok -> DeinitServer");
-        // COMPLETAR CODIGO RF
+        ESP_LOGI(TAG_COMMANDS, AT_DEINIT_SERVER);
+
+        // EXECUTE
+        server_deinit();
+
+        // ANSWER TO MASTER
+        uart_write_bytes(UART_NUM, COMMAND_DEINIT_SERVER_OK, strlen(COMMAND_DEINIT_SERVER_OK));
+
         return;
     }
     /*
@@ -239,7 +258,7 @@ void command_handler(char *command)
 
 
     */
-
+    ESP_LOGE(TAG_COMMANDS, "ERROR COMMAND");
     if (at)
         ESP_LOGE(TAG_COMMANDS, "at -> \"%s\"", at);
 
