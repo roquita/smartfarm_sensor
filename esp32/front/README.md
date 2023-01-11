@@ -26,3 +26,6 @@ Ex: {esp32-local-ip}:{esp32-port}/login.css  to serve  "login.css" file.
 
 ## Note
 * This repository only offer frontend to user.
+* Use postman collection to mockup a testing server.
+* Node JS version 16.13.0
+* Manually compress favicon.ico fileto gzip.
