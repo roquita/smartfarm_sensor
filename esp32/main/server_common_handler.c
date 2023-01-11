@@ -41,7 +41,7 @@ static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepa
     }
     else if (CHECK_FILE_EXTENSION(filepath, ".svg"))
     {
-        type = "text/xml";
+        type = "image/svg+xml";
     }
     return httpd_resp_set_type(req, type);
 }
@@ -62,6 +62,9 @@ esp_err_t rest_common_handler(httpd_req_t *req)
         strlcat(filepath, req->uri, sizeof(filepath));
     }
 
+    set_content_type_from_file(req, filepath);
+    strcat(filepath, ".gzip"); // COMENTAR SI NO USAS COMPRESION GZIP
+
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1)
     {
@@ -71,7 +74,8 @@ esp_err_t rest_common_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    set_content_type_from_file(req, filepath);
+    // SET ENCODGING-TYPE
+    httpd_resp_set_hdr(req, "content-encoding", "gzip"); // COMENTAR SI NO USAS COMPRESION GZIP
 
     char *chunk = (char *)calloc(SCRATCH_BUFSIZE, sizeof(char));
     ssize_t read_bytes;

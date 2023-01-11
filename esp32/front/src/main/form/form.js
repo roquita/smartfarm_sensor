@@ -5,23 +5,42 @@ window.Toast = bootstrap.Toast;
 import "./form.css";
 import "./bootstrap.scss";
 
-// Js files added to entry poitn
 
-
-// branches of entry point
-//import "../download/download";
-
-
-
-//DESCOMENTAR CODIGO PARA TENER UNA VENTANA PROPIA PARA DESCARGA, EN LUGAR DE SOLO UNA ALARMA.
-// EN INDEX.HTML TAMBIEN DESCOMENTAR LA SECCION "DESCARGA VIEW" Y COMENTAR "MODAL FADE"
+let base_url = "https://e26e62cf-ac30-4f8d-82a0-4cbcfee9d929.mock.pstmn.io";
 
 // INIT BOOTSTRAP TOAST
 var toastElList = [].slice.call(document.querySelectorAll('.toast'))
 toastElList.map(function (toastEl) {
-    return new Toast(toastEl, Toast.Default);    
+    return new Toast(toastEl, { delay: 3000 });
 })
 
+// RESET SELECT CONTENT
+function resetSelect(array) {
+    let SelectWifiSsid = document.getElementById('SelectWifiSsid');
+
+    // remove all options
+    let old_options = SelectWifiSsid.getElementsByTagName("option");
+    Array.from(old_options).forEach(option => {
+        SelectWifiSsid.removeChild(option);
+    });
+
+    // add default option
+    var default_opt = document.createElement('option');
+    default_opt.text = "Select SSID";
+    default_opt.selected = true;
+    default_opt.disabled = true;
+    SelectWifiSsid.appendChild(default_opt);
+
+    // add new ssid
+    array.forEach(ssid => {
+        var opt = document.createElement('option');
+        opt.text = ssid;
+        SelectWifiSsid.appendChild(opt);
+    });
+
+}
+
+// RESET CONTENT TOAST
 function resetToast(header, body, status) {
     // get variables
     var liveToastTag = document.getElementById("liveToast");
@@ -47,26 +66,28 @@ function resetToast(header, body, status) {
 }
 
 // ACTION FOR SEND FORM
-document.getElementById("SendForm").onclick = async function () {
+document.getElementById("Save").onclick = async function () {
 
-    var SmartFarmID = document.getElementById("SmartFarmID").value;
+    var SensorID = document.getElementById("SensorID").value;
     var EndPoint = document.getElementById("EndPoint").value;
     var LoraAppEui = document.getElementById("LoraAppEui").value;
     var LoraDevEui = document.getElementById("LoraDevEui").value;
     var LoraAppKey = document.getElementById("LoraAppKey").value;
+    var WifiSsid = document.getElementById("SelectWifiSsid").selectedOptions[0].text;
     var WifiPassword = document.getElementById("WifiPassword").value;
 
     let data = {
-        "SmartFarmID": SmartFarmID,
+        "SensorID": SensorID,
         "EndPoint": EndPoint,
         "LoraAppEui": LoraAppEui,
         "LoraDevEui": LoraDevEui,
         "LoraAppKey": LoraAppKey,
+        "WifiSsid": WifiSsid,
         "WifiPassword": WifiPassword,
     };
     console.log(data);
 
-    var response = await fetch("https://91a0e5d7-7a05-4c17-9424-e884dbb20f96.mock.pstmn.io/form", {
+    var response = await fetch(base_url + "/save", {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
@@ -74,25 +95,42 @@ document.getElementById("SendForm").onclick = async function () {
         }
     });
 
-    let body = await response.text();
+    let body = await response.json();
     if (response.status === 200) {
-        resetToast("Send Form", body, "icon-success");
+        resetToast("Save ", body["info"], "icon-success");
     } else {
-        resetToast("Send Form", body, "icon-failed");
+        resetToast("Save ", body["info"], "icon-failed");
     }
 };
 
 // ACTION FOR TEST UPLINK
 document.getElementById("TestUplink").onclick = async function () {
 
-    var response = await fetch("https://90697ef9-da35-4722-a815-3b692119f221.mock.pstmn.io/testuplink", {
-        method: "GET",      
+    var response = await fetch(base_url + "/testuplink", {
+        method: "GET",
     });
 
-    let body = await response.text();
+    let body = await response.json();
     if (response.status === 200) {
-        resetToast("Test Uplink", body, "icon-success");
+        resetToast("Test Uplink ", body["info"], "icon-success");
     } else {
-        resetToast("Test Uplink", body, "icon-failed");
+        resetToast("Test Uplink ", body["info"], "icon-failed");
     }
 };
+
+// ACTION FOR SCAN WIFI
+document.getElementById("ScanWifi").onclick = async function () {
+
+    var response = await fetch(base_url + "/wifiscan", {
+        method: "GET",
+    });
+
+    let body = await response.json();
+    if (response.status === 200) {
+        resetToast("Scan Wifi ", body["info"], "icon-success");
+        resetSelect(body["payload"]);
+    } else {
+        resetToast("Scan Wifi ", body["info"], "icon-failed");
+    }
+};
+
