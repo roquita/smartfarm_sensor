@@ -11,7 +11,7 @@ const PATHS = {
 module.exports = {
 
     entry: {
-        index: "./src/main/menu/menu.js"
+        index: "./src/main/form/form.js"
     },
 
     output: {
@@ -27,7 +27,7 @@ module.exports = {
             template: "./src/main/main.html",
             filename: '[name].html',
             title: 'Main common',
-            favicon: "./src/favicon.png"
+            favicon: "./src/favicon.ico"
         }),
 
         new MiniCssExtractPlugin({
