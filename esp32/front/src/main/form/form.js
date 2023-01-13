@@ -6,7 +6,10 @@ import "./form.css";
 import "./bootstrap.scss";
 
 
-let base_url = "https://e26e62cf-ac30-4f8d-82a0-4cbcfee9d929.mock.pstmn.io";
+let base_url = "http://192.168.4.1";
+let wifiscan_path = "/api/wifiscan";
+let testuplink_path = "/api/testuplink";
+let save_path = "/api/save";
 
 // INIT BOOTSTRAP TOAST
 var toastElList = [].slice.call(document.querySelectorAll('.toast'))
@@ -87,7 +90,7 @@ document.getElementById("Save").onclick = async function () {
     };
     console.log(data);
 
-    var response = await fetch(base_url + "/save", {
+    var response = await fetch(base_url + save_path, {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
@@ -106,7 +109,7 @@ document.getElementById("Save").onclick = async function () {
 // ACTION FOR TEST UPLINK
 document.getElementById("TestUplink").onclick = async function () {
 
-    var response = await fetch(base_url + "/testuplink", {
+    var response = await fetch(base_url + testuplink_path, {
         method: "GET",
     });
 
@@ -121,7 +124,7 @@ document.getElementById("TestUplink").onclick = async function () {
 // ACTION FOR SCAN WIFI
 document.getElementById("ScanWifi").onclick = async function () {
 
-    var response = await fetch(base_url + "/wifiscan", {
+    var response = await fetch(base_url + wifiscan_path, {
         method: "GET",
     });
 

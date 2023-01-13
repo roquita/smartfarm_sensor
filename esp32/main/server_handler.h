@@ -5,3 +5,4 @@
 
 
 esp_err_t rest_common_handler(httpd_req_t *req);
+esp_err_t wifi_scan_handler(httpd_req_t *req);

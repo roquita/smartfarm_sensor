@@ -63,6 +63,14 @@ server_res_t server_init()
         };
         httpd_register_uri_handler(server, &max7219_post_uri);
     */
+
+    httpd_uri_t wifi_scan = {
+        .uri = WIFI_SCAN_URI,
+        .method = WIFI_SCAN_METHOD,
+        .handler = wifi_scan_handler,
+    };
+    httpd_register_uri_handler(server, &wifi_scan);
+
     httpd_uri_t rest_common = {
         .uri = REST_COMMON_URI,
         .method = REST_COMMON_METHOD,

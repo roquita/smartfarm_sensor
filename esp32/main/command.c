@@ -9,7 +9,7 @@
 #include "wifi_station.h"
 #include "project_defines.h"
 #include "http_post.h"
-#include "wifi_accesspoint.h"
+#include "wifi_configmode.h"
 #include "server.h"
 
 static const char *TAG_COMMANDS = "COMMANDS";
@@ -139,57 +139,58 @@ void command_handler(char *command)
 
     /*
 
-     ██╗███╗   ██╗██╗████████╗     █████╗  ██████╗ ██████╗███████╗███████╗███████╗    ██████╗  ██████╗ ██╗███╗   ██╗████████╗
-     ██║████╗  ██║██║╚══██╔══╝    ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝    ██╔══██╗██╔═══██╗██║████╗  ██║╚══██╔══╝
-     ██║██╔██╗ ██║██║   ██║       ███████║██║     ██║     █████╗  ███████╗███████╗    ██████╔╝██║   ██║██║██╔██╗ ██║   ██║
-     ██║██║╚██╗██║██║   ██║       ██╔══██║██║     ██║     ██╔══╝  ╚════██║╚════██║    ██╔═══╝ ██║   ██║██║██║╚██╗██║   ██║
-     ██║██║ ╚████║██║   ██║       ██║  ██║╚██████╗╚██████╗███████╗███████║███████║    ██║     ╚██████╔╝██║██║ ╚████║   ██║
-     ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝       ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝    ╚═╝      ╚═════╝ ╚═╝╚═╝  ╚═══╝   ╚═╝
+     ██╗███╗   ██╗██╗████████╗     ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗     ███╗   ███╗ ██████╗ ██████╗ ███████╗
+     ██║████╗  ██║██║╚══██╔══╝    ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝     ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
+     ██║██╔██╗ ██║██║   ██║       ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗    ██╔████╔██║██║   ██║██║  ██║█████╗
+     ██║██║╚██╗██║██║   ██║       ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║    ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝
+     ██║██║ ╚████║██║   ██║       ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝    ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗
+     ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝     ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
 
 
     */
-    bool command_is_InitAccessPoint = (strcmp(at, AT_INIT_ACCESSPOINT) == 0) && (num_args == 2);
-    if (command_is_InitAccessPoint)
+
+    bool command_is_InitConfigMode = (strcmp(at, AT_INIT_CONFIGMODE) == 0) && (num_args == 2);
+    if (command_is_InitConfigMode)
     {
-        ESP_LOGI(TAG_COMMANDS, AT_INIT_ACCESSPOINT);
+        ESP_LOGI(TAG_COMMANDS, AT_INIT_CONFIGMODE);
 
         // EXECUTE
         char *ssid = args[0];
         char *pswd = args[1];
-        wifi_accesspoint_res_t res = wifi_accesspoint_init(ssid, pswd);
+        wifi_configmode_res_t res = wifi_configmode_init(ssid, pswd);
 
         // ANSWER TO MASTER
-        if (res == WIFI_ACCESSPOINT_OK)
+        if (res == WIFI_CONFIGMODE_OK)
         {
-            uart_write_bytes(UART_NUM, COMMAND_INIT_ACCESSPOINT_OK, strlen(COMMAND_INIT_ACCESSPOINT_OK));
+            uart_write_bytes(UART_NUM, COMMAND_INIT_CONFIGMODE_OK, strlen(COMMAND_INIT_CONFIGMODE_OK));
         }
         else
         {
-            uart_write_bytes(UART_NUM, COMMAND_INIT_ACCESSPOINT_FAILED, strlen(COMMAND_INIT_ACCESSPOINT_FAILED));
+            uart_write_bytes(UART_NUM, COMMAND_INIT_CONFIGMODE_FAILED, strlen(COMMAND_INIT_CONFIGMODE_FAILED));
         }
         return;
     }
+
     /*
 
-     ██████╗ ███████╗██╗███╗   ██╗██╗████████╗     █████╗  ██████╗ ██████╗███████╗███████╗███████╗    ██████╗  ██████╗ ██╗███╗   ██╗████████╗
-     ██╔══██╗██╔════╝██║████╗  ██║██║╚══██╔══╝    ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝    ██╔══██╗██╔═══██╗██║████╗  ██║╚══██╔══╝
-     ██║  ██║█████╗  ██║██╔██╗ ██║██║   ██║       ███████║██║     ██║     █████╗  ███████╗███████╗    ██████╔╝██║   ██║██║██╔██╗ ██║   ██║
-     ██║  ██║██╔══╝  ██║██║╚██╗██║██║   ██║       ██╔══██║██║     ██║     ██╔══╝  ╚════██║╚════██║    ██╔═══╝ ██║   ██║██║██║╚██╗██║   ██║
-     ██████╔╝███████╗██║██║ ╚████║██║   ██║       ██║  ██║╚██████╗╚██████╗███████╗███████║███████║    ██║     ╚██████╔╝██║██║ ╚████║   ██║
-     ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝       ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝    ╚═╝      ╚═════╝ ╚═╝╚═╝  ╚═══╝   ╚═╝
-
+     ██████╗ ███████╗██╗███╗   ██╗██╗████████╗     ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗     ███╗   ███╗ ██████╗ ██████╗ ███████╗
+     ██╔══██╗██╔════╝██║████╗  ██║██║╚══██╔══╝    ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝     ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
+     ██║  ██║█████╗  ██║██╔██╗ ██║██║   ██║       ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗    ██╔████╔██║██║   ██║██║  ██║█████╗
+     ██║  ██║██╔══╝  ██║██║╚██╗██║██║   ██║       ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║    ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝
+     ██████╔╝███████╗██║██║ ╚████║██║   ██║       ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝    ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗
+     ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝     ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
 
     */
-    bool command_is_DeinitAccessPoint = (strcmp(at, AT_DEINIT_ACCESSPOINT) == 0) && (num_args == 0);
-    if (command_is_DeinitAccessPoint)
+    bool command_is_DeinitConfigMode = (strcmp(at, AT_DEINIT_CONFIGMODE) == 0) && (num_args == 0);
+    if (command_is_DeinitConfigMode)
     {
-        ESP_LOGI(TAG_COMMANDS, AT_DEINIT_ACCESSPOINT);
+        ESP_LOGI(TAG_COMMANDS, AT_DEINIT_CONFIGMODE);
 
         // EXECUTE
-        wifi_accesspoint_deinit();
+        wifi_configmode_deinit();
 
         // ANSWER TO MASTER
-        uart_write_bytes(UART_NUM, COMMAND_DEINIT_ACCESSPOINT_OK, strlen(COMMAND_DEINIT_ACCESSPOINT_OK));
+        uart_write_bytes(UART_NUM, COMMAND_DEINIT_CONFIGMODE_OK, strlen(COMMAND_DEINIT_CONFIGMODE_OK));
 
         return;
     }
